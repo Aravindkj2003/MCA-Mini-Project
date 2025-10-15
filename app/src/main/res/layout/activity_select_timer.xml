@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#161414"
+    android:padding="24dp"
+    tools:context=".SelectTimerActivity">
+
+    <!-- Title -->
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="60dp"
+        android:autoSizeMaxTextSize="60sp"
+        android:autoSizeMinTextSize="30sp"
+        android:autoSizeStepGranularity="2sp"
+        android:autoSizeTextType="uniform"
+        android:ellipsize="none"
+        android:gravity="center"
+        android:singleLine="true"
+        android:text="TIMER TYPE"
+        android:textColor="#EBE6E6"
+        android:textSize="40sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@id/quickTimerButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed" />
+
+    <!-- Quick Timer Button -->
+    <Button
+        android:id="@+id/quickTimerButton"
+        android:layout_width="0dp"
+        android:layout_height="55dp"
+        android:layout_marginBottom="16dp"
+        android:autoSizeMaxTextSize="25sp"
+        android:autoSizeMinTextSize="18sp"
+        android:autoSizeStepGranularity="1sp"
+        android:autoSizeTextType="uniform"
+        android:backgroundTint="#6BBBE7"
+        android:text="QUICK TIMER"
+        android:textColor="#FBF9F9"
+        android:textSize="25sp"
+        app:layout_constraintBottom_toTopOf="@id/dailyTimerButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/textView3" />
+
+    <!-- Daily Timer Button -->
+    <Button
+        android:id="@+id/dailyTimerButton"
+        android:layout_width="0dp"
+        android:layout_height="55dp"
+        android:autoSizeMaxTextSize="25sp"
+        android:autoSizeMinTextSize="18sp"
+        android:autoSizeStepGranularity="1sp"
+        android:autoSizeTextType="uniform"
+        android:backgroundTint="#6BBBE7"
+        android:text="DAILY TIMER"
+        android:textColor="#F4F1F1"
+        android:textSize="25sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/quickTimerButton"
+        app:layout_constraintVertical_bias="0.0" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

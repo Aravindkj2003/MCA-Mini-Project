@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#101010"
+    android:fillViewport="true">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/main"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="24dp"
+        tools:context=".DailyTimerActivity">
+
+        <TextView
+            android:id="@+id/titleText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Set Daily Timer"
+            android:textColor="#FFFFFF"
+            android:textSize="30sp"
+            android:textStyle="bold"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <TextView
+            android:id="@+id/startTimeLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="Start Time"
+            android:textColor="#CCCCCC"
+            android:textSize="18sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/titleText" />
+
+        <TimePicker
+            android:id="@+id/startTimePicker"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:timePickerMode="spinner"
+            android:theme="@style/TimePickerTheme"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/startTimeLabel" />
+
+        <TextView
+            android:id="@+id/endTimeLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="End Time"
+            android:textColor="#CCCCCC"
+            android:textSize="18sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/startTimePicker" />
+
+        <TimePicker
+            android:id="@+id/endTimePicker"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:timePickerMode="spinner"
+            android:theme="@style/TimePickerTheme"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/endTimeLabel" />
+
+        <TextView
+            android:id="@+id/repeatLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Repeat On"
+            android:textColor="#CCCCCC"
+            android:textSize="18sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/endTimePicker" />
+
+        <GridLayout
+            android:id="@+id/dayButtonsLayout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:columnCount="2"
+            app:layout_constraintTop_toBottomOf="@id/repeatLabel"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <CheckBox android:id="@+id/sundayCheckbox" android:text="Sunday" style="@style/DayCheckbox"/>
+            <CheckBox android:id="@+id/mondayCheckbox" android:text="Monday" style="@style/DayCheckbox"/>
+            <CheckBox android:id="@+id/tuesdayCheckbox" android:text="Tuesday" style="@style/DayCheckbox"/>
+            <CheckBox android:id="@+id/wednesdayCheckbox" android:text="Wednesday" style="@style/DayCheckbox"/>
+            <CheckBox android:id="@+id/thursdayCheckbox" android:text="Thursday" style="@style/DayCheckbox"/>
+            <CheckBox android:id="@+id/fridayCheckbox" android:text="Friday" style="@style/DayCheckbox"/>
+            <CheckBox android:id="@+id/saturdayCheckbox" android:text="Saturday" style="@style/DayCheckbox"/>
+        </GridLayout>
+
+        <Button
+            android:id="@+id/saveDailyTimerButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:backgroundTint="#6BBBE7"
+            android:text="Save Daily Timer"
+            android:textColor="#EFE5E5"
+            android:textSize="18sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/dayButtonsLayout" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

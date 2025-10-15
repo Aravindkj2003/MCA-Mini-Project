@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">AutoMuteFinal</string>
+    <string-array name="sound_modes_array">
+        <item>Silent</item>
+        <item>Vibrate</item>
+    </string-array>
+</resources>
