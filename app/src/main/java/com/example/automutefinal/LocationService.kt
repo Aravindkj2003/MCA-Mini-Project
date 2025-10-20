@@ -69,25 +69,26 @@ class LocationService : Service() {
      * adjusts ringer mode based on proximity to saved locations.
      */
     private fun handleLocationUpdate(location: Location) {
-        val appSettings = getSharedPreferences("AppSettings", MODE_PRIVATE)
+        // Get SharedPreferences to track if our app muted the phone
+        val appStatePrefs = getSharedPreferences("AutoMuteState", MODE_PRIVATE)
 
-        if (appSettings.getBoolean("isQuickTimerActive", false)) {
+        // Skip checks if a timer is active
+        if (getSharedPreferences("AppSettings", MODE_PRIVATE).getBoolean("isQuickTimerActive", false)) {
             Log.d("LocationService", "Quick Timer active, skipping location checks")
             return
         }
-
         if (isDailyTimerActive()) {
             Log.d("LocationService", "Daily Timer active, skipping location-based mute")
             return
         }
 
         val savedLocations = loadSavedLocations()
+        // If there are no locations saved, we shouldn't interfere at all. Let's remove the automatic unmute.
         if (savedLocations.isEmpty()) {
-            audioManager.ringerMode = AudioManager.RINGER_MODE_NORMAL
             return
         }
 
-        var insideZone = false
+        var isInsideAnyZone = false
         for (savedLocation in savedLocations) {
             val distance = FloatArray(1)
             Location.distanceBetween(
@@ -95,18 +96,40 @@ class LocationService : Service() {
                 savedLocation.latitude, savedLocation.longitude,
                 distance
             )
+
             if (distance[0] < savedLocation.radius) {
-                audioManager.ringerMode = savedLocation.ringerMode
-                insideZone = true
-                break
+                // We are inside a zone.
+                isInsideAnyZone = true
+
+                // Only act if the phone is currently in NORMAL mode.
+                // This prevents us from overriding a user's manual VIBRATE setting if they are already in a zone.
+                if (audioManager.ringerMode == AudioManager.RINGER_MODE_NORMAL) {
+                    audioManager.ringerMode = savedLocation.ringerMode
+                    Log.d("LocationService", "Inside zone. Muting phone. Leaving a note.")
+
+                    // Leave a "note" that our app muted the phone.
+                    appStatePrefs.edit().putBoolean("isMutedByApp", true).apply()
+                }
+                break // Exit the loop since we found a matching zone
             }
         }
 
-        if (!insideZone) {
-            audioManager.ringerMode = AudioManager.RINGER_MODE_NORMAL
+        // --- THE SMART UNMUTE LOGIC ---
+        if (!isInsideAnyZone) {
+            // We are outside all zones. Check if we have a "note".
+            val wasMutedByApp = appStatePrefs.getBoolean("isMutedByApp", false)
+
+            if (wasMutedByApp) {
+                // The note exists! This means WE are responsible for unmuting.
+                Log.d("LocationService", "Outside zone. Found our note. Unmuting phone.")
+                audioManager.ringerMode = AudioManager.RINGER_MODE_NORMAL
+
+                // Erase the note. The user is back in control.
+                appStatePrefs.edit().putBoolean("isMutedByApp", false).apply()
+            }
+            // If wasMutedByApp is false, we do NOTHING, respecting the user's choice (like VIBRATE).
         }
     }
-
     /**
      * Checks if any daily timer is currently active based on the day and time.
      */

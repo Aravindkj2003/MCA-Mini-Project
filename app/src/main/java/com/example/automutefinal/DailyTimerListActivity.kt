@@ -13,6 +13,8 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.text.SimpleDateFormat
 import java.util.*
+import android.content.Context
+import android.media.AudioManager
 
 /**
  * Displays the list of daily timers.
@@ -86,6 +88,7 @@ class DailyTimerListActivity : AppCompatActivity() {
         }
     }
 
+
     /**
      * Loads all timers from SharedPreferences and displays them as buttons.
      * Long-clicking a timer deletes it.
@@ -121,7 +124,11 @@ class DailyTimerListActivity : AppCompatActivity() {
                 setOnLongClickListener {
                     deleteTimer(timer)
                     loadAndDisplayTimers()
-                    Toast.makeText(this@DailyTimerListActivity, "Timer deleted.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this@DailyTimerListActivity,
+                        "Timer deleted.",
+                        Toast.LENGTH_SHORT
+                    ).show()
                     true
                 }
             }
@@ -140,7 +147,15 @@ class DailyTimerListActivity : AppCompatActivity() {
 
     /** Converts a list of day numbers to a string of day abbreviations */
     private fun formatDays(days: List<Int>): String {
-        val dayMap = mapOf(1 to "Sun", 2 to "Mon", 3 to "Tue", 4 to "Wed", 5 to "Thu", 6 to "Fri", 7 to "Sat")
+        val dayMap = mapOf(
+            1 to "Sun",
+            2 to "Mon",
+            3 to "Tue",
+            4 to "Wed",
+            5 to "Thu",
+            6 to "Fri",
+            7 to "Sat"
+        )
         return days.sorted().joinToString(", ") { dayMap[it] ?: "" }
     }
 
@@ -169,12 +184,47 @@ class DailyTimerListActivity : AppCompatActivity() {
     }
 
     /**
-     * Deletes a timer from the list and cancels its alarms
+     * Deletes a timer, cancels its future alarms, and instantly unmutes
+     * the phone if the deleted timer was currently active.
      */
     private fun deleteTimer(timerToDelete: DailyTimer) {
+        // --- NEW LOGIC TO INSTANTLY UNMUTE ---
+        // First, check if the timer being deleted is active right now.
+        if (isTimerCurrentlyActive(timerToDelete)) {
+            // It is active, so we need to unmute the phone.
+            val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+            audioManager.ringerMode = AudioManager.RINGER_MODE_NORMAL
+        }
+        // --- END OF NEW LOGIC ---
+
+        // Cancel all future alarms for this timer
         timerScheduler.cancel(timerToDelete)
+
+        // Remove the timer from our saved list
         val timers = loadTimers()
         timers.removeAll { it.id == timerToDelete.id }
         saveTimers(timers)
     }
+
+
+    /**
+     * Checks if a specific daily timer is active at the current moment.
+     * @param timer The DailyTimer to check.
+     * @return True if the timer is currently active, false otherwise.
+     */
+    private fun isTimerCurrentlyActive(timer: DailyTimer): Boolean {
+        val now = Calendar.getInstance()
+        val currentDay = now.get(Calendar.DAY_OF_WEEK)
+        val currentTimeInMinutes = now.get(Calendar.HOUR_OF_DAY) * 60 + now.get(Calendar.MINUTE)
+
+        if (timer.daysOfWeek.contains(currentDay)) {
+            val startTime = timer.startHour * 60 + timer.startMinute
+            val endTime = timer.endHour * 60 + timer.endMinute
+            if (currentTimeInMinutes in startTime until endTime) {
+                return true
+            }
+        }
+        return false
+    }
+
 }

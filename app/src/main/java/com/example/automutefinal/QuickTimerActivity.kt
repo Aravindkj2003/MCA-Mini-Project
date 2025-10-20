@@ -5,7 +5,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.media.AudioManager
+import android.media.AudioManager // Make sure this import is present
 import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
@@ -35,13 +35,6 @@ class QuickTimerActivity : AppCompatActivity() {
     private val quickTimerFlag = "isQuickTimerActive"
     private val timerEndTimeKey = "quickTimerEndTime"
 
-    /**
-     * Initializes the activity:
-     * - Sets the layout
-     * - Binds UI elements
-     * - Initializes AlarmManager
-     * - Sets up button click listeners for starting and cancelling the quick timer
-     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_quick_timer)
@@ -59,31 +52,16 @@ class QuickTimerActivity : AppCompatActivity() {
         cancelTimerButton.setOnClickListener { cancelQuickTimer() }
     }
 
-    /**
-     * Called when activity comes to foreground.
-     * Checks if a quick timer is active and updates the UI accordingly.
-     */
     override fun onResume() {
         super.onResume()
         checkTimerStateAndUpdateUi()
     }
 
-    /**
-     * Called when activity goes to background.
-     * Cancels the UI countdown to prevent memory leaks.
-     */
     override fun onPause() {
         super.onPause()
         uiCountdownTimer?.cancel()
     }
 
-    /**
-     * Starts a quick timer based on user input.
-     * - Sets an exact alarm using AlarmManager
-     * - Activates Do Not Disturb (DND) if permission is granted
-     * - Updates shared preferences to store timer state and end time
-     * - Updates the UI to show countdown
-     */
     private fun startQuickTimer() {
         val minutes = minutesInput.text.toString().toLongOrNull()
 
@@ -143,7 +121,12 @@ class QuickTimerActivity : AppCompatActivity() {
         )
         alarmManager.cancel(pendingIntent)
 
-        restoreRinger()
+        // --- THE ONE-LINE FIX ---
+        // Instantly unmute the phone when the cancel button is pressed.
+        (getSystemService(Context.AUDIO_SERVICE) as AudioManager).ringerMode = AudioManager.RINGER_MODE_NORMAL
+        // --- END OF FIX ---
+
+        restoreRinger() // This function handles the rest of the cleanup
         Toast.makeText(this, "Timer cancelled.", Toast.LENGTH_SHORT).show()
     }
 
@@ -168,12 +151,6 @@ class QuickTimerActivity : AppCompatActivity() {
         checkTimerStateAndUpdateUi()
     }
 
-    /**
-     * Checks the state of the quick timer from shared preferences.
-     * - Updates UI to show input layout if timer is inactive
-     * - Shows countdown layout if timer is active
-     * - Starts the UI countdown if needed
-     */
     private fun checkTimerStateAndUpdateUi() {
         val prefs = getSharedPreferences(sharedPrefsName, MODE_PRIVATE)
         val isTimerActive = prefs.getBoolean(quickTimerFlag, false)
@@ -197,11 +174,6 @@ class QuickTimerActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Starts a countdown timer in the UI for the remaining duration.
-     * Updates the TextView every second.
-     * Calls checkTimerStateAndUpdateUi() when finished.
-     */
     private fun startUiCountdown(milliseconds: Long) {
         uiCountdownTimer?.cancel()
         uiCountdownTimer = object : CountDownTimer(milliseconds, 1000) {
@@ -215,4 +187,4 @@ class QuickTimerActivity : AppCompatActivity() {
             }
         }.start()
     }
-}
+} 

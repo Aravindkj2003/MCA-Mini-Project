@@ -9,6 +9,8 @@ import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.gson.Gson
+import android.content.Context
+import android.media.AudioManager
 import com.google.gson.reflect.TypeToken
 
 class LocationListActivity : AppCompatActivity() {
@@ -96,6 +98,11 @@ class LocationListActivity : AppCompatActivity() {
      * Deletes a saved location from SharedPreferences and stops the
      * location service if no locations remain.
      */
+    /**
+     * Deletes a saved location from SharedPreferences and instantly unmutes
+     * the phone if it was muted by the app. Stops the location service
+     * if no locations remain.
+     */
     private fun deleteLocation(locationToRemove: SavedLocation) {
         val sharedPreferences = getSharedPreferences("LocationPrefs", MODE_PRIVATE)
         val editor = sharedPreferences.edit()
@@ -104,21 +111,41 @@ class LocationListActivity : AppCompatActivity() {
         val type = object : TypeToken<MutableList<SavedLocation>>() {}.type
         val locationsList: MutableList<SavedLocation> = if (json != null) gson.fromJson(json, type) else mutableListOf()
 
-        // Remove the specific location
+        // Remove the specific location from the list
         locationsList.removeAll { it.name == locationToRemove.name && it.latitude == locationToRemove.latitude && it.longitude == locationToRemove.longitude }
+
+        // --- NEW LOGIC TO INSTANTLY UNMUTE ---
+        // Get access to the phone's audio controls
+        val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+
+        // Check the "note" we left in SharedPreferences
+        val appStatePrefs = getSharedPreferences("AutoMuteState", MODE_PRIVATE)
+        val wasMutedByApp = appStatePrefs.getBoolean("isMutedByApp", false)
+
+        // If our app was the one that muted the phone, it's now our responsibility to unmute it.
+        if (wasMutedByApp) {
+            // Set the ringer back to normal
+            audioManager.ringerMode = AudioManager.RINGER_MODE_NORMAL
+
+            // Erase the "note" so the service knows the user is back in control
+            appStatePrefs.edit().putBoolean("isMutedByApp", false).apply()
+        }
+        // --- END OF NEW LOGIC ---
 
         // Stop the location service if there are no locations left
         if (locationsList.isEmpty()) {
             val serviceIntent = Intent(this, LocationService::class.java)
             stopService(serviceIntent)
+
+            // Also, clear the mute-by-app flag just in case
+            appStatePrefs.edit().putBoolean("isMutedByApp", false).apply()
         }
 
-        // Save the updated list
+        // Save the updated list back to SharedPreferences
         val updatedJson = gson.toJson(locationsList)
         editor.putString("locations", updatedJson)
         editor.apply()
     }
-
     /**
      * Updates the UI to show either the empty state or the list of locations.
      */

@@ -4,7 +4,6 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import java.util.*
 
 class TimerScheduler(private val context: Context) {
@@ -38,7 +37,7 @@ class TimerScheduler(private val context: Context) {
 
     /**
      * Schedules a single alarm for a specific day, hour, minute, and action (silent or normal).
-     * Uses setExactAndAllowWhileIdle for precise alarm triggering.
+     * Now uses setAlarmClock for the highest precision.
      */
     fun scheduleAlarm(timer: DailyTimer, dayOfWeek: Int, hour: Int, minute: Int, action: String) {
         val intent = Intent(context, TimerAlarmReceiver::class.java).apply {
@@ -67,12 +66,10 @@ class TimerScheduler(private val context: Context) {
             }
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent)
-        } else {
-            alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent)
-        }
-    }
+        // Use the highest priority alarm method
+        val alarmClockInfo = AlarmManager.AlarmClockInfo(calendar.timeInMillis, pendingIntent)
+        alarmManager.setAlarmClock(alarmClockInfo, pendingIntent)
+    } // <-- This closing brace was missing
 
     /**
      * Cancels a specific alarm for a given DailyTimer, day, and action.
